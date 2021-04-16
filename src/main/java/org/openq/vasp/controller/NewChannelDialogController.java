@@ -8,6 +8,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import lombok.extern.slf4j.Slf4j;
 import org.openq.vasp.bean.Channel;
+import org.openq.vasp.bean.ChannelDisplayType;
 import org.openq.vasp.bean.ChannelType;
 
 import java.util.List;
@@ -36,8 +37,9 @@ public class NewChannelDialogController
         channelTypeComboBox.getSelectionModel().select(0);
 
         displayTypeComboBox.setItems(FXCollections.observableArrayList());
-        displayTypeComboBox.getItems().add("Line chart");
-        displayTypeComboBox.getItems().add("Bar chart");
+        displayTypeComboBox.getItems().add(ChannelDisplayType.TABLE_VIEW);
+        displayTypeComboBox.getItems().add(ChannelDisplayType.LINE_CHART);
+        displayTypeComboBox.getItems().add(ChannelDisplayType.BAR_CHART);
         displayTypeComboBox.getSelectionModel().select(0);
 
         displayPaneComboBox.setItems(FXCollections.observableArrayList());
@@ -65,7 +67,7 @@ public class NewChannelDialogController
         Channel channel = new Channel();
         channel.setName(channelNameTextField.getText());
         channel.setType(channelTypeComboBox.getSelectionModel().getSelectedItem());
-        channel.setPrimaryDisplayType(channelTypeComboBox.getSelectionModel().getSelectedItem());
+        channel.setPrimaryDisplayType(displayTypeComboBox.getSelectionModel().getSelectedItem());
         channel.setDisplayPane(displayPaneComboBox.getSelectionModel().getSelectedItem());
         return channel;
     }

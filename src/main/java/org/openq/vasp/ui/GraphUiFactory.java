@@ -1,4 +1,4 @@
-package org.openq.vasp.util;
+package org.openq.vasp.ui;
 
 public class GraphUiFactory
 {

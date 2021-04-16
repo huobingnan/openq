@@ -1,4 +1,4 @@
-package org.openq.vasp.util;
+package org.openq.vasp.ui;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;

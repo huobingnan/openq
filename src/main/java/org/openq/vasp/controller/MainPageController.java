@@ -12,14 +12,14 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import lombok.extern.slf4j.Slf4j;
 import org.openq.vasp.bean.Channel;
+import org.openq.vasp.bean.ChannelDisplayType;
 import org.openq.vasp.bean.ContcarFile;
 import org.openq.vasp.bean.Frame;
-import org.openq.vasp.util.ChannelUiFactory;
-import org.openq.vasp.util.ChannelGraphFactory;
+import org.openq.vasp.ui.ChannelUiFactory;
+import org.openq.vasp.ui.ChannelGraphFactory;
 import org.openq.vasp.util.ContcarParser;
 import org.openq.vasp.util.MyValidator;
 
@@ -261,29 +261,47 @@ public class MainPageController
         String channelName = channelTabPane.getSelectionModel().getSelectedItem().getText();
         NewFrameDialogController controller = newFrameDialogLoader.getController();
         controller.accept(channelNameAndInstance.get(channelName));
-
-        Optional<ButtonType> buttonType = ChannelUiFactory.buildNewFrameDialog(newFrameDialogRoot).showAndWait();
-        if (buttonType.isPresent() && buttonType.get().equals(ButtonType.OK))
+        Dialog<ButtonType> newFrameDialog = ChannelUiFactory.buildNewFrameDialog(newFrameDialogRoot);
+        Alert invalidInputAlert = new Alert(Alert.AlertType.ERROR, "", ButtonType.OK);
+        invalidInputAlert.setTitle("Error input");
+        invalidInputAlert.setHeaderText("Invalid options input");
+        for(;;)
         {
-            Frame newFrame = controller.getFrame();
-            Button source = (Button)event.getSource();
-            HBox frameContainer = (HBox)source.getParent();
-            Button frame = ChannelUiFactory.buildFrameButton(newFrame);
-            HBox.setMargin(frame, new Insets(10));
-            ObservableList<Node> children = frameContainer.getChildren();
-            int insertIndex = children.size() - 1;
-            // 将这一帧的数据缓存起来
-            if (channelNameAndFrames.containsKey(channelName))
+            Optional<ButtonType> buttonType = newFrameDialog.showAndWait();
+            if (buttonType.isPresent() && buttonType.get().equals(ButtonType.OK))
             {
-                channelNameAndFrames.get(channelName).add(newFrame);
-            }else
-            {
-                List<Frame> frameList = new ArrayList<>();
-                frameList.add(newFrame);
-                channelNameAndFrames.put(channelName, frameList);
+                Frame newFrame = controller.getFrame();
+                List<String> errorMessages = MyValidator.validate(newFrame);
+                if (!errorMessages.isEmpty())
+                {
+                    final StringBuilder builder = new StringBuilder();
+                    builder.append("For those specific reasons:\n");
+                    errorMessages.forEach(error -> builder.append("\t").append(error).append("\n"));
+                    invalidInputAlert.setContentText(builder.toString());
+                    invalidInputAlert.showAndWait();
+                    continue;
+                }
+                Button source = (Button)event.getSource();
+                HBox frameContainer = (HBox)source.getParent();
+                Button frame = ChannelUiFactory.buildFrameButton(newFrame);
+                HBox.setMargin(frame, new Insets(10));
+                ObservableList<Node> children = frameContainer.getChildren();
+                int insertIndex = children.size() - 1;
+                // 将这一帧的数据缓存起来
+                if (channelNameAndFrames.containsKey(channelName))
+                {
+                    channelNameAndFrames.get(channelName).add(newFrame);
+                }else
+                {
+                    List<Frame> frameList = new ArrayList<>();
+                    frameList.add(newFrame);
+                    channelNameAndFrames.put(channelName, frameList);
+                }
+                children.add(insertIndex, frame);
             }
-            children.add(insertIndex, frame);
+            break;
         }
+
 
     }
 
@@ -343,18 +361,22 @@ public class MainPageController
      */
     private void doShowChannelButtonClick(ActionEvent event)
     {
+        Alert unSupportDisplayAlert = new Alert(Alert.AlertType.ERROR, "", ButtonType.OK);
+        unSupportDisplayAlert.setTitle("UnSupport Error");
+        unSupportDisplayAlert.setHeaderText("UnSupport Display Operation");
         Tab selectedTab = channelTabPane.getSelectionModel().getSelectedItem();
         String channelName = selectedTab.getText();
         Channel instance = channelNameAndInstance.get(channelName);
         List<Frame> frameList = channelNameAndFrames.get(channelName);
         Node node = ChannelGraphFactory.build(instance, frameList, resourceAndContcarFile);
-        //TODO 将node添加至display面板
         if (node != null)
         {
             graphTabPane.getSelectionModel().getSelectedItem().setContent(node);
         } else
         {
-            log.error("Node is null");
+            unSupportDisplayAlert.setContentText("UnSupport Display Type : " + instance.getPrimaryDisplayType() +
+                    " With Channel Type : " + instance.getType());
+            unSupportDisplayAlert.showAndWait();
         }
     }
 }

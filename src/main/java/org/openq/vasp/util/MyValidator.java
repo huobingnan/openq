@@ -2,6 +2,7 @@ package org.openq.vasp.util;
 
 import org.hibernate.validator.HibernateValidator;
 import org.openq.vasp.bean.Channel;
+import org.openq.vasp.bean.Frame;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -25,6 +26,17 @@ public final class MyValidator
         Set<ConstraintViolation<Channel>> validateResult = validator.validate(channel);
         List<String> errorMessage = new ArrayList<>();
         for (ConstraintViolation<Channel> constraintViolation : validateResult)
+        {
+            errorMessage.add(constraintViolation.getMessage());
+        }
+        return errorMessage;
+    }
+
+    public static List<String> validate(Frame frame)
+    {
+        Set<ConstraintViolation<Frame>> validateResult = validator.validate(frame);
+        List<String> errorMessage = new ArrayList<>();
+        for (ConstraintViolation<Frame> constraintViolation : validateResult)
         {
             errorMessage.add(constraintViolation.getMessage());
         }
