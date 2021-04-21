@@ -27,7 +27,7 @@ public class ApplicationMain extends Application
         stage.setScene(scene);
         stage.setWidth(1000);
         stage.setHeight(800);
-        stage.setTitle("VASPIO");
+        stage.setTitle("iVASP"); // 更改名称
         stage.show();
     }
 

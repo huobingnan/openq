@@ -18,9 +18,10 @@ public final class ChannelGraphFactory
 
 // ---------------------------------------- Graph View Factory Methods -------------------------------------------------
 
-    private static Node buildBondDistanceTableView(List<Frame> frameList, Map<String, ContcarFile> resourceAndFile)
+    private static Node buildBondDistanceTableView(List<Frame> frameList, Map<String, ContcarFile> resourceAndFile,
+                                                   Map<String, Object> settings)
     {
-        final List<Map<String, Double>> frameBondResult = FrameLists.calculateBondDistance(frameList, resourceAndFile);
+        final List<Map<String, Double>> frameBondResult = FrameLists.calculateBondDistance(frameList, resourceAndFile, settings);
         // 将将所有搜寻到的键取并集
         Set<String> finalBondSet = new TreeSet<>();
         for (Map<String, Double> stringDoubleHashMap : frameBondResult)
@@ -100,7 +101,7 @@ public final class ChannelGraphFactory
             if (ChannelDisplayType.TABLE_VIEW.equals(displayType))
             {
                 // 处理键长列表显示形式的渲染
-                result = buildBondDistanceTableView(frameList, resourceAndFile);
+                result = buildBondDistanceTableView(frameList, resourceAndFile, channel.getSettings());
             }
         }
         return result;

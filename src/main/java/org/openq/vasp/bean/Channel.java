@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+
 import javax.validation.constraints.NotBlank;
+import java.util.Hashtable;
 
 @Data
 @Accessors(chain = true)
@@ -28,4 +30,13 @@ public class Channel
     // 展示在哪个图形界面上
     @NotBlank(message = "Display pane can't be blank")
     private String displayPane;
+
+    // channel的一些配置项，这里配置项的值对象一定要重写toString方法
+    private Hashtable<String, Object> settings = new Hashtable<>();
+
+    public void putSetting(String settingKey, Object value)
+    {
+        settings.put(settingKey, value);
+    }
+
 }

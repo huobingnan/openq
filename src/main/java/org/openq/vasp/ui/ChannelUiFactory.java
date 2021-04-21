@@ -3,10 +3,11 @@ package org.openq.vasp.ui;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
@@ -14,8 +15,11 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.openq.vasp.bean.Channel;
+import org.openq.vasp.bean.ChannelSettingPair;
 import org.openq.vasp.bean.Frame;
+import org.openq.vasp.config.ChannelSettingKey;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public final class ChannelUiFactory
@@ -88,5 +92,49 @@ public final class ChannelUiFactory
         HBox.setMargin(addFrameButton, new Insets(10));
         ScrollPane scrollPane = new ScrollPane(frameContainer);
         return new Tab(channel.getName(), scrollPane);
+    }
+
+    public static Dialog<ChannelSettingPair> buildNewChannelSettingDialog()
+    {
+        final Label settingNameLabel = new Label("Setting name:");
+        final Label settingValueLabel = new Label("Setting value:");
+        final ComboBox<String> settingNameComboBox = new ComboBox<>();
+        settingNameComboBox.setPrefWidth(200);
+        settingNameComboBox.setItems(FXCollections.observableArrayList(ChannelSettingKey.getKeyCollection()));
+        final TextField settingValueTextField = new TextField();
+        settingValueTextField.setPrefWidth(200);
+        final GridPane gridPane = new GridPane();
+        gridPane.setHgap(10);
+        gridPane.setVgap(20);
+        gridPane.setPadding(new Insets(15));
+        gridPane.add(settingNameLabel, 0, 0);
+        gridPane.add(settingNameComboBox, 1, 0);
+        gridPane.add(settingValueLabel, 0, 1);
+        gridPane.add(settingValueTextField, 1, 1);
+
+        Dialog<ChannelSettingPair> dialog = new Dialog<>();
+        dialog.setTitle("New setting content");
+        dialog.getDialogPane().setContent(gridPane);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.setOnShowing(action ->
+        {
+            settingValueTextField.requestFocus();
+            settingValueTextField.setText("");
+        });
+        dialog.setResultConverter(buttonType ->
+        {
+            if (buttonType.equals(ButtonType.OK))
+            {
+                return new ChannelSettingPair(settingNameComboBox.getValue(), settingValueTextField.getText());
+            } else
+            {
+                return null;
+            }
+        });
+
+        settingNameComboBox.getSelectionModel().select(0);
+
+        return dialog;
     }
 }

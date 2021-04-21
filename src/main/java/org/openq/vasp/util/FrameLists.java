@@ -4,6 +4,7 @@ import org.jblas.DoubleMatrix;
 import org.openq.vasp.bean.ContcarFile;
 import org.openq.vasp.bean.CoordinateType;
 import org.openq.vasp.bean.Frame;
+import org.openq.vasp.config.ChannelSettingKey;
 
 
 import java.util.*;
@@ -62,14 +63,25 @@ public final class FrameLists
      * @return 计算结果
      */
     public static List<Map<String, Double>> calculateBondDistance(List<Frame> frameList,
-                                                                      Map<String, ContcarFile> resourceAndFile)
+                                                                  Map<String, ContcarFile> resourceAndFile,
+                                                                  Map<String, Object> settings)
     {
         /*
            最终计算的结果，帧的查找键为帧在数组中的索引
          */
         final ArrayList<Map<String, Double>> bondDistanceResult = new ArrayList<>();
 
-        final double distanceMax = 2.0D;
+        // 先设置为默认值
+        double distanceMax = Double.parseDouble(ChannelSettingKey.getKeyDefaultValue(ChannelSettingKey.BOND_LENGTH_MAX));
+
+        if (settings.containsKey(ChannelSettingKey.BOND_LENGTH_MAX))
+        {
+            try
+            {
+                distanceMax = Double.parseDouble((String) settings.get(ChannelSettingKey.BOND_LENGTH_MAX));
+            }catch (Exception ignored){}
+        }
+
         for (int i = 0; i < frameList.size(); ++i)
         {
             // 初始化结果集
